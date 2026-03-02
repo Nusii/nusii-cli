@@ -6,7 +6,9 @@ import (
 )
 
 func TestDefaults(t *testing.T) {
-	// Clear env vars that might interfere
+	// Isolate from real config file
+	os.Setenv("XDG_CONFIG_HOME", t.TempDir())
+	defer os.Unsetenv("XDG_CONFIG_HOME")
 	os.Unsetenv("NUSII_API_KEY")
 	os.Unsetenv("NUSII_API_URL")
 	os.Unsetenv("NUSII_OUTPUT")

@@ -256,12 +256,7 @@ func (c *Client) GetClient(id string) ([]byte, *models.SingleResponse[models.Cli
 
 // CreateClient creates a new client.
 func (c *Client) CreateClient(attrs models.Client) ([]byte, *models.SingleResponse[models.Client], error) {
-	body := models.CreateRequest[models.Client]{
-		Data: models.CreateResource[models.Client]{
-			Type:       "clients",
-			Attributes: attrs,
-		},
-	}
+	body := map[string]models.Client{"client": attrs}
 	resp, err := c.Post("/clients", body)
 	if err != nil {
 		return nil, nil, err
@@ -279,12 +274,7 @@ func (c *Client) CreateClient(attrs models.Client) ([]byte, *models.SingleRespon
 
 // UpdateClient updates an existing client.
 func (c *Client) UpdateClient(id string, attrs models.Client) ([]byte, *models.SingleResponse[models.Client], error) {
-	body := models.CreateRequest[models.Client]{
-		Data: models.CreateResource[models.Client]{
-			Type:       "clients",
-			Attributes: attrs,
-		},
-	}
+	body := map[string]models.Client{"client": attrs}
 	resp, err := c.Put("/clients/"+id, body)
 	if err != nil {
 		return nil, nil, err
@@ -353,12 +343,7 @@ func (c *Client) GetProposal(id string) ([]byte, *models.SingleResponse[models.P
 
 // CreateProposal creates a new proposal.
 func (c *Client) CreateProposal(attrs models.Proposal) ([]byte, *models.SingleResponse[models.Proposal], error) {
-	body := models.CreateRequest[models.Proposal]{
-		Data: models.CreateResource[models.Proposal]{
-			Type:       "proposals",
-			Attributes: attrs,
-		},
-	}
+	body := map[string]models.Proposal{"proposal": attrs}
 	resp, err := c.Post("/proposals", body)
 	if err != nil {
 		return nil, nil, err
@@ -376,12 +361,7 @@ func (c *Client) CreateProposal(attrs models.Proposal) ([]byte, *models.SingleRe
 
 // UpdateProposal updates an existing proposal.
 func (c *Client) UpdateProposal(id string, attrs models.Proposal) ([]byte, *models.SingleResponse[models.Proposal], error) {
-	body := models.CreateRequest[models.Proposal]{
-		Data: models.CreateResource[models.Proposal]{
-			Type:       "proposals",
-			Attributes: attrs,
-		},
-	}
+	body := map[string]models.Proposal{"proposal": attrs}
 	resp, err := c.Put("/proposals/"+id, body)
 	if err != nil {
 		return nil, nil, err
@@ -471,12 +451,7 @@ func (c *Client) GetSection(id string) ([]byte, *models.SingleResponse[models.Se
 
 // CreateSection creates a new section.
 func (c *Client) CreateSection(attrs models.Section) ([]byte, *models.SingleResponse[models.Section], error) {
-	body := models.CreateRequest[models.Section]{
-		Data: models.CreateResource[models.Section]{
-			Type:       "sections",
-			Attributes: attrs,
-		},
-	}
+	body := map[string]models.Section{"section": attrs}
 	resp, err := c.Post("/sections", body)
 	if err != nil {
 		return nil, nil, err
@@ -494,12 +469,7 @@ func (c *Client) CreateSection(attrs models.Section) ([]byte, *models.SingleResp
 
 // UpdateSection updates an existing section.
 func (c *Client) UpdateSection(id string, attrs models.Section) ([]byte, *models.SingleResponse[models.Section], error) {
-	body := models.CreateRequest[models.Section]{
-		Data: models.CreateResource[models.Section]{
-			Type:       "sections",
-			Attributes: attrs,
-		},
-	}
+	body := map[string]models.Section{"section": attrs}
 	resp, err := c.Put("/sections/"+id, body)
 	if err != nil {
 		return nil, nil, err
@@ -567,12 +537,7 @@ func (c *Client) GetLineItem(id string) ([]byte, *models.SingleResponse[models.L
 
 // CreateLineItem creates a new line item under a section.
 func (c *Client) CreateLineItem(sectionID string, attrs models.LineItem) ([]byte, *models.SingleResponse[models.LineItem], error) {
-	body := models.CreateRequest[models.LineItem]{
-		Data: models.CreateResource[models.LineItem]{
-			Type:       "line_items",
-			Attributes: attrs,
-		},
-	}
+	body := map[string]models.LineItem{"line_item": attrs}
 	resp, err := c.Post("/sections/"+sectionID+"/line_items", body)
 	if err != nil {
 		return nil, nil, err
@@ -590,12 +555,7 @@ func (c *Client) CreateLineItem(sectionID string, attrs models.LineItem) ([]byte
 
 // UpdateLineItem updates an existing line item.
 func (c *Client) UpdateLineItem(id string, attrs models.LineItem) ([]byte, *models.SingleResponse[models.LineItem], error) {
-	body := models.CreateRequest[models.LineItem]{
-		Data: models.CreateResource[models.LineItem]{
-			Type:       "line_items",
-			Attributes: attrs,
-		},
-	}
+	body := map[string]models.LineItem{"line_item": attrs}
 	resp, err := c.Put("/line_items/"+id, body)
 	if err != nil {
 		return nil, nil, err
@@ -680,8 +640,14 @@ func (c *Client) ListUsers(page, perPage int) ([]byte, *models.ListResponse[mode
 	return raw, &result, nil
 }
 
-// ListThemes fetches themes.
-func (c *Client) ListThemes() ([]byte, *models.ListResponse[models.Theme], error) {
+// ThemeItem represents a theme as returned by the API (plain object, not JSON:API).
+type ThemeItem struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+}
+
+// ListThemes fetches themes. The API returns a plain array, not JSON:API format.
+func (c *Client) ListThemes() ([]byte, []ThemeItem, error) {
 	resp, err := c.Get("/themes")
 	if err != nil {
 		return nil, nil, err
@@ -690,11 +656,11 @@ func (c *Client) ListThemes() ([]byte, *models.ListResponse[models.Theme], error
 	if err != nil {
 		return nil, nil, err
 	}
-	var result models.ListResponse[models.Theme]
+	var result []ThemeItem
 	if err := json.Unmarshal(raw, &result); err != nil {
 		return raw, nil, err
 	}
-	return raw, &result, nil
+	return raw, result, nil
 }
 
 // ListWebhooks fetches webhook endpoints.
@@ -734,12 +700,7 @@ func (c *Client) GetWebhook(id string) ([]byte, *models.SingleResponse[models.We
 
 // CreateWebhook creates a new webhook endpoint.
 func (c *Client) CreateWebhook(attrs models.WebhookEndpoint) ([]byte, *models.SingleResponse[models.WebhookEndpoint], error) {
-	body := models.CreateRequest[models.WebhookEndpoint]{
-		Data: models.CreateResource[models.WebhookEndpoint]{
-			Type:       "webhook_endpoints",
-			Attributes: attrs,
-		},
-	}
+	body := map[string]models.WebhookEndpoint{"webhook_endpoint": attrs}
 	resp, err := c.Post("/webhook_endpoints", body)
 	if err != nil {
 		return nil, nil, err

@@ -3,7 +3,6 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/nusii/nusii-cli/internal/models"
 	"github.com/nusii/nusii-cli/internal/output"
 )
 
@@ -33,10 +32,10 @@ Examples:
 			return output.PrintJSON(raw)
 		}
 
-		headers := models.ThemeTableHeaders()
+		headers := []string{"ID", "Name"}
 		var rows [][]string
-		for _, r := range result.Data {
-			rows = append(rows, r.Attributes.ThemeTableRow(r.ID))
+		for _, t := range result {
+			rows = append(rows, []string{t.ID, t.Name})
 		}
 		output.PrintTable(headers, rows)
 		return nil

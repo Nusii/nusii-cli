@@ -1,7 +1,9 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
+	"strconv"
 
 	"github.com/spf13/cobra"
 
@@ -101,9 +103,9 @@ Examples:
 		attrs.RecurringType, _ = cmd.Flags().GetString("recurring-type")
 		attrs.PerType, _ = cmd.Flags().GetString("per-type")
 		quantity, _ := cmd.Flags().GetInt("quantity")
-		attrs.Quantity = quantity
+		attrs.Quantity = json.Number(strconv.Itoa(quantity))
 		amount, _ := cmd.Flags().GetInt("amount")
-		attrs.AmountInCents = amount
+		attrs.Amount = amount
 
 		client := newAPIClient()
 		raw, result, err := client.CreateLineItem(sectionID, attrs)
@@ -148,11 +150,11 @@ Examples:
 		}
 		if cmd.Flags().Changed("quantity") {
 			v, _ := cmd.Flags().GetInt("quantity")
-			attrs.Quantity = v
+			attrs.Quantity = json.Number(strconv.Itoa(v))
 		}
 		if cmd.Flags().Changed("amount") {
 			v, _ := cmd.Flags().GetInt("amount")
-			attrs.AmountInCents = v
+			attrs.Amount = v
 		}
 
 		client := newAPIClient()

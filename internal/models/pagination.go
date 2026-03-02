@@ -33,13 +33,3 @@ type SingleResponse[T any] struct {
 	Data Resource[T] `json:"data"`
 }
 
-// CreateRequest wraps a resource for create/update requests.
-type CreateRequest[T any] struct {
-	Data CreateResource[T] `json:"data"`
-}
-
-// CreateResource is a JSON:API resource for create/update requests.
-type CreateResource[T any] struct {
-	Type       string `json:"type"`
-	Attributes T      `json:"attributes"`
-}
