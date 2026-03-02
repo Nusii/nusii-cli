@@ -1,0 +1,42 @@
+version: 2
+project_name: nusii
+before:
+  hooks:
+    - go mod tidy
+builds:
+  - env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w
+      - -X github.com/nusii/nusii-cli/cmd.version={{.Version}}
+      - -X github.com/nusii/nusii-cli/cmd.commit={{.Commit}}
+      - -X github.com/nusii/nusii-cli/cmd.date={{.Date}}
+archives:
+  - format: tar.gz
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+checksum:
+  name_template: "checksums.txt"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^ci:"
+brews:
+  - repository:
+      owner: nusii
+      name: homebrew-tap
+    homepage: "https://github.com/nusii/nusii-cli"
+    description: "CLI for the Nusii proposal software API"
+    license: "MIT"
+    install: |
+      bin.install "nusii"
+    test: |
+      system "#{bin}/nusii", "version"
