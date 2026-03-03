@@ -81,6 +81,7 @@ nusii sections delete 456
 
 ```bash
 nusii line-items list --section-id 456
+nusii line-items get 789
 nusii line-items create --section-id 456 --name "Design" --amount 50000 --quantity 1
 nusii line-items update 789 --amount 60000
 nusii line-items delete 789
@@ -92,10 +93,13 @@ Amounts are in **cents** (e.g., `50000` = $500.00).
 
 ```bash
 nusii activities list
+nusii activities list --proposal-id 123
 nusii users list
 nusii themes list
 nusii webhooks list
+nusii webhooks get 123
 nusii webhooks create --target-url "https://example.com/webhook" --events "proposal.sent,proposal.accepted"
+nusii webhooks delete 123
 ```
 
 ## Output Formats
@@ -140,9 +144,13 @@ Environment variables (`NUSII_API_KEY`, `NUSII_API_URL`, `NUSII_OUTPUT`) overrid
 The CLI is designed to be scriptable and AI-agent friendly:
 
 - JSON output when piped (`stdout` is not a TTY)
-- `--no-input` disables all confirmation prompts
+- `--no-input` disables all confirmation prompts (use `--confirm` on delete commands)
 - Structured error output: `{"error": "message", "status": 404}`
 - Consistent exit codes: `0` success, `1` error, `2` auth, `3` not found, `4` validation, `5` rate limited
+
+## License
+
+[Apache License 2.0](LICENSE)
 
 ## Development
 
