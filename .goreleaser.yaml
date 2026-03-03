@@ -18,8 +18,7 @@ builds:
       - -X github.com/nusii/nusii-cli/cmd.commit={{.Commit}}
       - -X github.com/nusii/nusii-cli/cmd.date={{.Date}}
 archives:
-  - format: tar.gz
-    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+  - name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
 checksum:
   name_template: "checksums.txt"
 changelog:
@@ -35,7 +34,7 @@ brews:
       name: homebrew-tap
     homepage: "https://github.com/nusii/nusii-cli"
     description: "CLI for the Nusii proposal software API"
-    license: "MIT"
+    license: "Apache-2.0"
     install: |
       bin.install "nusii"
     test: |
