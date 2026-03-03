@@ -32,6 +32,7 @@ brews:
   - repository:
       owner: nusii
       name: homebrew-tap
+      token: "{{ .Env.TAP_GITHUB_TOKEN }}"
     homepage: "https://github.com/nusii/nusii-cli"
     description: "CLI for the Nusii proposal software API"
     license: "Apache-2.0"
