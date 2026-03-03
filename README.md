@@ -148,6 +148,37 @@ The CLI is designed to be scriptable and AI-agent friendly:
 - Structured error output: `{"error": "message", "status": 404}`
 - Consistent exit codes: `0` success, `1` error, `2` auth, `3` not found, `4` validation, `5` rate limited
 
+### AI Agent Usage
+
+The CLI works well with AI coding agents like [Claude Code](https://docs.anthropic.com/en/docs/claude-code), [Codex](https://openai.com/codex), and others. Use `-o json` and `--confirm` for fully non-interactive workflows:
+
+```bash
+# List accepted proposals as JSON
+nusii proposals list --status accepted -o json
+
+# Create and parse result
+nusii clients create --name "Acme Corp" --email info@acme.com -o json | jq '.data.id'
+
+# Delete without confirmation prompt
+nusii clients delete 123 --confirm
+```
+
+#### Claude Code Skill
+
+This repo includes a Claude Code skill that lets you manage Nusii resources using natural language. It is automatically discovered when you open Claude Code in this project directory.
+
+```
+/nusii-cli list all accepted proposals
+/nusii-cli create a client named "Acme Corp" with email info@acme.com
+/nusii-cli show me the line items for section 456
+```
+
+To make the skill available globally, copy it to your personal skills directory:
+
+```bash
+cp -r .claude/skills/nusii-cli ~/.claude/skills/nusii-cli
+```
+
 ## License
 
 [Apache License 2.0](LICENSE)
