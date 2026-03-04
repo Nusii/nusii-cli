@@ -7,9 +7,10 @@ import (
 )
 
 var (
-	version = "dev"
-	commit  = "none"
-	date    = "unknown"
+	version       = "dev"
+	commit        = "none"
+	date          = "unknown"
+	oauthClientID = ""
 )
 
 var versionCmd = &cobra.Command{
