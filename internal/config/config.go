@@ -3,6 +3,7 @@ package config
 import (
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/spf13/viper"
 )
@@ -13,9 +14,13 @@ const (
 )
 
 type Config struct {
-	APIKey  string `mapstructure:"api_key"`
-	APIURL  string `mapstructure:"api_url"`
-	Output  string `mapstructure:"output"`
+	APIKey            string `mapstructure:"api_key"`
+	APIURL            string `mapstructure:"api_url"`
+	Output            string `mapstructure:"output"`
+	OAuthAccessToken  string `mapstructure:"oauth_access_token"`
+	OAuthRefreshToken string `mapstructure:"oauth_refresh_token"`
+	OAuthExpiry       string `mapstructure:"oauth_expiry"`
+	OAuthClientID     string `mapstructure:"oauth_client_id"`
 }
 
 // ConfigDir returns the nusii config directory path.
@@ -51,6 +56,7 @@ func Load() (*Config, error) {
 	v.BindEnv("api_key", "NUSII_API_KEY")
 	v.BindEnv("api_url", "NUSII_API_URL")
 	v.BindEnv("output", "NUSII_OUTPUT")
+	v.BindEnv("oauth_client_id", "NUSII_OAUTH_CLIENT_ID")
 
 	cfg := &Config{}
 	if err := v.Unmarshal(cfg); err != nil {
@@ -72,8 +78,64 @@ func Save(cfg *Config) error {
 	v.Set("api_key", cfg.APIKey)
 	v.Set("api_url", cfg.APIURL)
 	v.Set("output", cfg.Output)
+	v.Set("oauth_access_token", cfg.OAuthAccessToken)
+	v.Set("oauth_refresh_token", cfg.OAuthRefreshToken)
+	v.Set("oauth_expiry", cfg.OAuthExpiry)
+	v.Set("oauth_client_id", cfg.OAuthClientID)
 
 	return v.WriteConfigAs(ConfigPath())
+}
+
+// HasOAuthToken returns true if OAuth tokens are configured.
+func (c *Config) HasOAuthToken() bool {
+	return c.OAuthAccessToken != "" && c.OAuthRefreshToken != ""
+}
+
+// AuthMethod returns the current authentication method: "oauth", "api_key", or "none".
+func (c *Config) AuthMethod() string {
+	if c.HasOAuthToken() {
+		return "oauth"
+	}
+	if c.APIKey != "" {
+		return "api_key"
+	}
+	return "none"
+}
+
+// OAuthExpiryTime parses the stored OAuth expiry as a time.Time.
+func (c *Config) OAuthExpiryTime() (time.Time, error) {
+	if c.OAuthExpiry == "" {
+		return time.Time{}, nil
+	}
+	return time.Parse(time.RFC3339, c.OAuthExpiry)
+}
+
+// SaveOAuthTokens stores OAuth tokens and clears the API key.
+func SaveOAuthTokens(accessToken, refreshToken string, expiry time.Time, clientID string) error {
+	cfg, err := Load()
+	if err != nil {
+		return err
+	}
+	cfg.APIKey = ""
+	cfg.OAuthAccessToken = accessToken
+	cfg.OAuthRefreshToken = refreshToken
+	cfg.OAuthExpiry = expiry.Format(time.RFC3339)
+	cfg.OAuthClientID = clientID
+	return Save(cfg)
+}
+
+// ClearAuth removes both API key and OAuth tokens from the config.
+func ClearAuth() error {
+	cfg, err := Load()
+	if err != nil {
+		return err
+	}
+	cfg.APIKey = ""
+	cfg.OAuthAccessToken = ""
+	cfg.OAuthRefreshToken = ""
+	cfg.OAuthExpiry = ""
+	cfg.OAuthClientID = ""
+	return Save(cfg)
 }
 
 // RemoveAPIKey removes the API key from the config file.

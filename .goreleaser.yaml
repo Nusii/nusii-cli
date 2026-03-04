@@ -17,6 +17,7 @@ builds:
       - -X github.com/nusii/nusii-cli/cmd.version={{.Version}}
       - -X github.com/nusii/nusii-cli/cmd.commit={{.Commit}}
       - -X github.com/nusii/nusii-cli/cmd.date={{.Date}}
+      - -X github.com/nusii/nusii-cli/cmd.oauthClientID={{ .Env.OAUTH_CLIENT_ID }}
 archives:
   - name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
 checksum:

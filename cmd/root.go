@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/spf13/cobra"
 
@@ -79,7 +80,28 @@ func Execute() error {
 
 // newAPIClient creates an authenticated API client from the current config.
 func newAPIClient() *api.Client {
-	authenticator := auth.NewTokenAuth(cfg.APIKey)
+	var authenticator auth.Authenticator
+
+	if flagAPIKey != "" || (cfg.APIKey != "" && !cfg.HasOAuthToken()) {
+		authenticator = auth.NewTokenAuth(cfg.APIKey)
+	} else if cfg.HasOAuthToken() {
+		expiry, _ := cfg.OAuthExpiryTime()
+		clientID := resolveOAuthClientID()
+		tokenURL := cfg.APIURL + "/oauth/token"
+		authenticator = &auth.OAuthAuth{
+			AccessToken:  cfg.OAuthAccessToken,
+			RefreshToken: cfg.OAuthRefreshToken,
+			Expiry:       expiry,
+			TokenURL:     tokenURL,
+			ClientID:     clientID,
+			OnRefresh: func(accessToken, refreshToken string, newExpiry time.Time) error {
+				return config.SaveOAuthTokens(accessToken, refreshToken, newExpiry, clientID)
+			},
+		}
+	} else {
+		authenticator = auth.NewTokenAuth("")
+	}
+
 	client := api.NewClient(cfg.APIURL, authenticator)
 	client.Debug = flagDebug
 	client.Version = version
