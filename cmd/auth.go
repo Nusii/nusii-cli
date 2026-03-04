@@ -209,8 +209,16 @@ func loginWithOAuth() error {
 		return fmt.Errorf("validating OAuth token: %w", err)
 	}
 
-	// Save to config
-	if err := config.SaveOAuthTokens(tokenResp.AccessToken, tokenResp.RefreshToken, expiry, clientID); err != nil {
+	// Save to config (clears API key, preserves API URL)
+	saveCfg := &config.Config{
+		APIURL:            cfg.APIURL,
+		Output:            cfg.Output,
+		OAuthAccessToken:  tokenResp.AccessToken,
+		OAuthRefreshToken: tokenResp.RefreshToken,
+		OAuthExpiry:       expiry.Format(time.RFC3339),
+		OAuthClientID:     clientID,
+	}
+	if err := config.Save(saveCfg); err != nil {
 		return fmt.Errorf("saving config: %w", err)
 	}
 
